@@ -114,7 +114,7 @@ if ($serialNumber -match "PF3X") {
 } else {
     # If serial number doesn't contain "PF3X", open Windows update
     Update-Progress -statusMessage "Serial Number Does Not Match 'PF3X' - Opening Windows Update..." -progressValue 99
-    [System.Windows.Forms.MessageBox]::Show("Click OK to open Windows update", "Popup Title", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    # [System.Windows.Forms.MessageBox]::Show("Click OK to open Windows update", "Popup Title", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
 
     # Open Windows update
     Start-Process "ms-settings:windowsupdate"
