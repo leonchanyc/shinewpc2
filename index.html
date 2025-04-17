@@ -1,126 +1,14 @@
-# Load Windows Forms assembly for GUI elements
-Add-Type -AssemblyName System.Windows.Forms
-
-# Create a new form (window)
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "Script Progress"
-$form.Width = 600
-$form.Height = 250
-$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-$form.TopMost = $true  # Make the form always on top
-
-# Create a Label to display the current status
-$statusLabel = New-Object System.Windows.Forms.Label
-$statusLabel.Size = New-Object System.Drawing.Size(550, 40)
-$statusLabel.Location = New-Object System.Drawing.Point(20, 20)
-$statusLabel.Text = "Starting Script..."
-$form.Controls.Add($statusLabel)
-
-# Create a ProgressBar to show progress
-$progressBar = New-Object System.Windows.Forms.ProgressBar
-$progressBar.Size = New-Object System.Drawing.Size(550, 30)
-$progressBar.Location = New-Object System.Drawing.Point(20, 70)
-$progressBar.Minimum = 0
-$progressBar.Maximum = 100
-$progressBar.Value = 0
-$form.Controls.Add($progressBar)
-
-# Show the form
-$form.Show()
-
-# Update the progress function
-function Update-Progress {
-    param (
-        [string]$statusMessage,
-        [int]$progressValue
-    )
-    $statusLabel.Text = $statusMessage
-    $progressBar.Value = $progressValue
-    $form.Refresh()  # Refresh the form to update the UI
-}
-
-# For battery power (after 0 minutes):
-Update-Progress -statusMessage "Changing Power Settings (Battery)... Please wait..." -progressValue 10
+#For battery power (after 0 minutes):
 powercfg /change monitor-timeout-dc 0
+
+#For plugged in (after 0 minutes)
+powercfg /change monitor-timeout-ac 0
+
+#For battery power (after 0 minutes)
 powercfg /change standby-timeout-dc 0
 
-# For plugged in (after 0 minutes)
-Update-Progress -statusMessage "Changing Power Settings (Plugged In)... Please wait..." -progressValue 20
-powercfg /change monitor-timeout-ac 0
+#For plugged in (after 0 minutes)
 powercfg /change standby-timeout-ac 0
 
-# Change to Downloads directory
-cd $env:USERPROFILE\Downloads
-
-# Remove previous Lenovo_Vantage folder if it exists
-Update-Progress -statusMessage "Removing old Lenovo Vantage folder..." -progressValue 30
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue Lenovo_Vantage
-
-# Download Lenovo_Vantage in the background
-Update-Progress -statusMessage "Downloading Lenovo Vantage..." -progressValue 40
-$downloadProcess = Start-Process "curl" -ArgumentList "-o", "Lenovo_Vantage.zip", "https://download.lenovo.com/pccbbs/thinkvantage_en/metroapps/Vantage/LenovoCommercialVantage_10.2501.15.0_v3.zip" -PassThru
-$downloadProcess.WaitForExit()
-
-# Extract the zip only after the download is complete
-Update-Progress -statusMessage "Extracting Lenovo Vantage..." -progressValue 50
-Expand-Archive -Path "Lenovo_Vantage.zip" -DestinationPath "Lenovo_Vantage"
-
-# Run the setup after extraction is done
-Update-Progress -statusMessage "Installing Lenovo Vantage..." -progressValue 60
-Start-Process -FilePath "Lenovo_Vantage\setup-commercial-vantage" -Wait
-
-# Remove previous WiFi driver folder if it exists
-Update-Progress -statusMessage "Removing old WiFi driver folder..." -progressValue 70
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue WiFi-22.250.1-Driver64-Win10-Win11
-
-# Download the WiFi driver using Start-Process (similar to Lenovo_Vantage)
-Update-Progress -statusMessage "Downloading WiFi driver..." -progressValue 80
-$wifiDownloadProcess = Start-Process "curl" -ArgumentList "-o", "WiFi-22.250.1-Driver64-Win10-Win11.zip", "https://content.evernote.com/shard/s395/sh/14e605bd-51e6-48c2-3fe1-62bb546a7c68/VlbmcEcSxpd8daKgUf5F1Ks9pkqZ0nGnDgOm8dzzjUVtBJlS9y4bR_OCBg/res/b593f6de-ba61-a24a-41c0-edf7c7bcc1e2" -PassThru
-$wifiDownloadProcess.WaitForExit()
-
-# Extract the zip
-Update-Progress -statusMessage "Extracting WiFi driver..." -progressValue 90
-Expand-Archive -Path "WiFi-22.250.1-Driver64-Win10-Win11.zip" -DestinationPath "WiFi-22.250.1-Driver64-Win10-Win11"
-
-# Remove the zip file
-Remove-Item WiFi-22.250.1-Driver64-Win10-Win11.zip
-
-# Install driver using pnputil
-Update-Progress -statusMessage "Installing WiFi driver..." -progressValue 95
-cd WiFi-22.250.1-Driver64-Win10-Win11
-pnputil /add-driver *.inf /subdirs
-
-# Open Device Manager to verify wifi driver version
-devmgmt
-
-# Get the system's serial number
-$serialNumber = (wmic bios get serialnumber).Trim()
-
-# Check if the serial number contains "PF3X"
-if ($serialNumber -match "PF3X") {
-    # Display an alert if "PF3X" is found
-    Update-Progress -statusMessage "Serial Number Matches 'PF3X' - Adjusting power settings..." -progressValue 98
-    [System.Windows.Forms.MessageBox]::Show("For P14s, change Power mode to Best power efficiency (On battery & Plugged in)", "Popup Title", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
-
-    # Open Power & Sleep settings
-    Start-Process "ms-settings:powersleep"
-
-    # Inform user to change Power mode
-    [System.Windows.Forms.MessageBox]::Show("Click OK to open Windows update after changing Power mode", "Popup Title", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
-
-    # Open Windows update
-    Start-Process "ms-settings:windowsupdate"
-
-} else {
-    # If serial number doesn't contain "PF3X", open Windows update
-    Update-Progress -statusMessage "Serial Number Does Not Match 'PF3X' - Opening Windows Update..." -progressValue 99
-    # [System.Windows.Forms.MessageBox]::Show("Click OK to open Windows update", "Popup Title", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
-
-    # Open Windows update
-    Start-Process "ms-settings:windowsupdate"
-}
-
-# Final update to complete the process
-Update-Progress -statusMessage "Script Completed!" -progressValue 100
-Start-Sleep -Seconds 2
-$form.Close()
+#Display prompt
+Start-Process cmd -ArgumentList '/k', 'taskkill /f /im powershell.exe & cls & title new hire laptop for %username% & @echo off & echo new hire laptop for %username%
