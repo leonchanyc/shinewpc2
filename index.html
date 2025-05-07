@@ -12,3 +12,5 @@ powercfg /change standby-timeout-ac 0
 
 #Display prompt
 Start-Process cmd -ArgumentList '/k', 'taskkill /f /im powershell.exe & cls & title new hire laptop for %username% & @echo off & echo new hire laptop for %username%'
+
+Start-Process "msedge.exe" nosleep.page
