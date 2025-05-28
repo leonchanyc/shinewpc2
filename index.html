@@ -1,14 +1,14 @@
 #For battery power (after 0 minutes):
-powercfg /change monitor-timeout-dc 0
+#powercfg /change monitor-timeout-dc 0
 
 #For plugged in (after 0 minutes)
-powercfg /change monitor-timeout-ac 0
+#powercfg /change monitor-timeout-ac 0
 
 #For battery power (after 0 minutes)
-powercfg /change standby-timeout-dc 0
+#powercfg /change standby-timeout-dc 0
 
 #For plugged in (after 0 minutes)
-powercfg /change standby-timeout-ac 0
+#powercfg /change standby-timeout-ac 0
 
 #Display prompt
 Start-Process cmd -ArgumentList '/k', 'taskkill /f /im powershell.exe & cls & title new hire laptop for %username% & @echo off & echo new hire laptop for %username%'
