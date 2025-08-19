@@ -24,8 +24,8 @@ $batchFile = "$env:USERPROFILE\Downloads\keepawake.bat"
 @"
 @echo off
 title new hire laptop for %username%
-cls
 :loop
+cls
 echo new hire laptop for %username%
 
 
@@ -35,4 +35,5 @@ goto loop
 "@ | Set-Content -Encoding ASCII $batchFile
 
 Start-Process cmd.exe -ArgumentList "/k `"$batchFile`""
+
 
