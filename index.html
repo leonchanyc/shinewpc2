@@ -29,11 +29,12 @@ cls
 echo new hire laptop for %username%
 
 
-#echo Keeping system awake...
+
 timeout /t 60 >nul
 goto loop
 "@ | Set-Content -Encoding ASCII $batchFile
 
 Start-Process cmd.exe -ArgumentList "/k `"$batchFile`""
+
 
 
