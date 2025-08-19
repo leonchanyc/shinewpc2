@@ -10,8 +10,27 @@
 #For plugged in (after 0 minutes)
 #powercfg /change standby-timeout-ac 0
 
+#============================================
 Start-Process "msedge.exe" nosleep.page
 
 
 #Display prompt
 Start-Process cmd -ArgumentList '/k', 'taskkill /f /im powershell.exe & cls & title new hire laptop for %username% & @echo off & echo new hire laptop for %username%'
+
+#=============================================
+
+$batchFile = "$env:USERPROFILE\Downloads\keepawake.bat"
+
+@"
+@echo off
+title new hire laptop for %username%
+cls
+echo new hire laptop for %username%
+
+:loop
+echo Keeping system awake...
+timeout /t 60 >nul
+goto loop
+"@ | Set-Content -Encoding ASCII $batchFile
+
+Start-Process cmd.exe -ArgumentList "/k `"$batchFile`""
